@@ -323,6 +323,11 @@ async def read_root():
         </html>
         """)
 
+@app.get("/ping")
+async def ping():
+    """간단한 핑 테스트 - Railway 헬스체크용"""
+    return {"message": "pong", "status": "ok"}
+
 @app.post("/analyze")
 async def analyze_images(
     files: List[UploadFile] = File(...),
@@ -528,10 +533,26 @@ async def get_app_js():
 
 @app.get("/health")
 async def health_check():
-    """헬스 체크"""
-    seoul_tz = timezone(timedelta(hours=9))
-    seoul_time = datetime.now(seoul_tz)
-    return {"status": "healthy", "timestamp": seoul_time.isoformat()}
+    """헬스 체크 - Railway 배포용"""
+    try:
+        # 기본 상태 확인
+        seoul_tz = timezone(timedelta(hours=9))
+        seoul_time = datetime.now(seoul_tz)
+        
+        # 간단한 응답으로 변경 (복잡한 로직 제거)
+        return {
+            "status": "healthy",
+            "timestamp": seoul_time.isoformat(),
+            "service": "ai-safety-assessment-api",
+            "version": "1.0.0"
+        }
+    except Exception as e:
+        # 오류 발생 시에도 응답
+        return {
+            "status": "error",
+            "message": str(e),
+            "service": "ai-safety-assessment-api"
+        }
 
 if __name__ == "__main__":
     import uvicorn
