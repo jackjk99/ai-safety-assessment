@@ -1,0 +1,16 @@
+# OpenAI API 설정
+OPENAI_API_KEY=your_openai_api_key_here
+
+# OpenAI 모델 설정 (기본값: gpt-4o-mini)
+OPENAI_MODEL=gpt-4o-mini
+
+# 서버 설정
+HOST=0.0.0.0
+PORT=8000
+
+# Supabase 데이터베이스 설정
+SUPABASE_URL=your_supabase_project_url_here
+SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# JWT 보안 설정
+SECRET_KEY=your_secret_key_here

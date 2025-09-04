@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 위험성 평가 웹앱</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>🏗️ AI 위험성 평가</h1>
+    <div class="header-controls">
+      <button id="login-btn" class="primary" style="margin-right: 10px;">로그인</button>
+      <div class="user-info" id="user-info" style="display: none;">
+        <span id="user-name"></span>
+        <button id="logout-btn" class="logout-btn">로그아웃</button>
+      </div>
+      <div class="status" id="health-status" title="백엔드 상태">백엔드 확인 중...</div>
+    </div>
+  </header>
+
+  <!-- 로그인 모달 -->
+  <div id="login-modal" class="modal" style="display: block;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🔐 베타 테스트 로그인</h2>
+        <span class="close" id="close-login" onclick="document.getElementById('login-modal').style.display='none'">&times;</span>
+      </div>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">사용자명:</label>
+          <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+          <label for="password">비밀번호:</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="primary">로그인</button>
+      </form>
+      <div class="beta-accounts">
+        <h3>베타 테스트 계정:</h3>
+        <p><strong>tester1</strong> / beta123!</p>
+        <p><strong>tester2</strong> / beta123!</p>
+        <p><strong>tester3</strong> / beta123!</p>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <section class="uploader">
+      <h2>📸 작업 환경 이미지 업로드</h2>
+      <p class="hint">동일 현장의 사진 여러 장을 업로드하면 통합 평가를 수행합니다. (JPG/PNG)</p>
+      <label class="file-label" for="file-input">이미지 선택</label>
+      <input id="file-input" type="file" accept="image/*" multiple />
+      <div id="preview" class="preview-grid" aria-live="polite"></div>
+
+      <button id="analyze-btn" class="primary" disabled>📊 통합 분석 - 종합 위험성 평가서 생성</button>
+    </section>
+
+    <section id="results" class="results hidden">
+      <header class="results-header">
+        <div class="meta">
+          <span id="image-count"></span>
+          <span id="timestamp"></span>
+        </div>
+        <div class="actions">
+          <button id="download-zip" class="secondary">📁 전체 섹션 ZIP 다운로드</button>
+        </div>
+      </header>
+
+      <div class="tabs" role="tablist" aria-label="결과 탭">
+        <button class="tab active" data-tab="sgr">✅ SGR 체크리스트</button>
+        <button class="tab" data-tab="risk">🔍 위험요인 분석</button>
+        <button class="tab" data-tab="rec">💡 추가 권장사항</button>
+        <button class="tab" data-tab="feedback">💬 피드백</button>
+      </div>
+
+      <section id="tab-sgr" class="tab-panel active" role="tabpanel" aria-labelledby="sgr">
+        <div class="table-wrap">
+          <table id="table-sgr" class="md-table"></table>
+        </div>
+        <div class="downloads">
+          <button id="download-sgr" class="secondary">📥 SGR 체크리스트 결과 다운로드 (.xls)</button>
+        </div>
+      </section>
+
+      <section id="tab-risk" class="tab-panel" role="tabpanel" aria-labelledby="risk">
+        <div class="table-wrap">
+          <table id="table-risk" class="md-table"></table>
+        </div>
+        <div class="downloads">
+          <button id="download-risk" class="secondary">📥 위험요인 분석 결과 다운로드 (.xls)</button>
+        </div>
+      </section>
+
+      <section id="tab-rec" class="tab-panel" role="tabpanel" aria-labelledby="rec">
+        <article id="rec-content" class="markdown"></article>
+        <div class="downloads">
+          <button id="download-rec" class="secondary">📥 추가 권장사항 다운로드 (.xls)</button>
+        </div>
+      </section>
+
+      <!-- 피드백 섹션 -->
+      <section id="tab-feedback" class="tab-panel" role="tabpanel" aria-labelledby="feedback">
+        <div class="feedback-section">
+          <h3>💬 베타 테스트 피드백</h3>
+          <p>이 분석 결과에 대한 피드백을 남겨주세요. 여러분의 의견이 서비스 개선에 큰 도움이 됩니다.</p>
+          
+          <form id="feedback-form">
+            <div class="form-group">
+              <label for="feedback-rating">전체적인 만족도:</label>
+              <div class="rating-input">
+                <input type="radio" id="rating-5" name="rating" value="5">
+                <label for="rating-5">⭐⭐⭐⭐⭐ 매우 만족</label>
+                <input type="radio" id="rating-4" name="rating" value="4">
+                <label for="rating-4">⭐⭐⭐⭐ 만족</label>
+                <input type="radio" id="rating-3" name="rating" value="3">
+                <label for="rating-3">⭐⭐⭐ 보통</label>
+                <input type="radio" id="rating-2" name="rating" value="2">
+                <label for="rating-2">⭐⭐ 불만족</label>
+                <input type="radio" id="rating-1" name="rating" value="1">
+                <label for="rating-1">⭐ 매우 불만족</label>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="feedback-text">상세 피드백:</label>
+              <textarea id="feedback-text" name="feedback" rows="6" 
+                placeholder="분석 결과의 정확성, 사용성, 개선사항 등에 대한 의견을 자유롭게 작성해주세요..."></textarea>
+            </div>
+            
+            <button type="submit" class="primary">피드백 제출</button>
+          </form>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <template id="preview-item-tpl">
+    <figure class="preview-item">
+      <img alt="미리보기" />
+      <figcaption></figcaption>
+    </figure>
+  </template>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <!-- 모래시계 스피너 -->
+  <div id="spinner" class="spinner-overlay hidden">
+    <div class="spinner-container">
+      <div class="sandglass"></div>
+      <p class="spinner-text">AI가 이미지를 분석하고 있습니다...</p>
+      <p class="spinner-subtext">잠시만 기다려주세요</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
+
