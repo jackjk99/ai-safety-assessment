@@ -328,6 +328,16 @@ async def ping():
     """간단한 핑 테스트 - Railway 헬스체크용"""
     return {"message": "pong", "status": "ok"}
 
+@app.get("/status")
+async def status():
+    """상태 확인 - Railway 헬스체크용"""
+    return {"status": "running"}
+
+@app.get("/")
+async def root():
+    """루트 경로 - Railway 헬스체크용"""
+    return {"message": "AI Safety Assessment API is running"}
+
 @app.post("/analyze")
 async def analyze_images(
     files: List[UploadFile] = File(...),
@@ -560,4 +570,20 @@ if __name__ == "__main__":
     
     # 환경 변수에서 포트 가져오기 (Railway용)
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    host = "0.0.0.0"
+    
+    print(f"🚀 서버 시작 중...")
+    print(f"📍 호스트: {host}")
+    print(f"🔌 포트: {port}")
+    print(f"🌐 환경: {os.environ.get('RAILWAY_ENVIRONMENT', 'local')}")
+    
+    try:
+        uvicorn.run(
+            app, 
+            host=host, 
+            port=port,
+            log_level="info"
+        )
+    except Exception as e:
+        print(f"❌ 서버 시작 실패: {e}")
+        raise
